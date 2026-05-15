@@ -2,6 +2,28 @@
 
 Step-by-step Google Colab notebook for turning REDCap exports into cleaner, analysis-ready Excel workbooks.
 
+<p align="center">
+  <img src="teaser.png" alt="REDCap Cleaner step-by-step workflow teaser" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://colab.research.google.com/drive/1zZG9gbXq1o3bruxNNkm54csMEjJiuBsc?usp=sharing">
+    <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab">
+  </a>
+</p>
+
+<p align="center">
+  <strong>Clean REDCap exports without hand-editing spreadsheets.</strong><br>
+  Upload an export, review IDs, rename columns, normalize visits, and download one traceable workbook.
+</p>
+
+<p align="center">
+  <code>_raw</code> + <code>_cleaned</code> + <code>timepoint_dictionary</code> + <code>column_variable_dictionary</code> + <code>excluded_rows</code>
+</p>
+
+> [!TIP]
+> If GitHub shows an `Invalid Notebook` preview, open the notebook in Colab instead. GitHub's notebook renderer can fail on Colab widget metadata, but the linked notebook is meant to run in Colab.
+
 [Open the REDCap Cleaner notebook in Google Colab](https://colab.research.google.com/drive/1zZG9gbXq1o3bruxNNkm54csMEjJiuBsc?usp=sharing)
 
 Use this when you have a REDCap `.csv`, `.xls`, or `.xlsx` export and want to:
