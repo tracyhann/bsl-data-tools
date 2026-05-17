@@ -70,11 +70,23 @@ The notebook downloads one `.xlsx` file with these sheets:
 
 Run the setup section before using the workflow cells. This loads the cleaner engine and helper functions.
 
+<p align="center">
+  <img src="tutorial/001.png" alt="Run the setup section in Google Colab" width="100%">
+</p>
+
 ### 2. Upload a REDCap Export
 
 Run **1. Upload REDCap export**, choose your REDCap export file, and wait for Colab to confirm the filename, row count, and column count.
 
+<p align="center">
+  <img src="tutorial/002.png" alt="Upload a REDCap export file in Google Colab" width="100%">
+</p>
+
 After upload, the notebook displays a column-name preview and a data preview. Wide REDCap exports may show shortened preview column names while preserving the original column names for cleaning and export.
+
+<p align="center">
+  <img src="tutorial/003.png" alt="Review column and data previews after uploading a REDCap export" width="100%">
+</p>
 
 ### 3. Customize Configuration
 
@@ -87,17 +99,29 @@ Set:
 - `Drop fully empty rows`: optional cleanup for blank REDCap rows;
 - `Column keep / rename`: choose which columns to keep and type shorter cleaned names where helpful.
 
+<p align="center">
+  <img src="tutorial/004.png" alt="Customize REDCap Cleaner configuration options" width="100%">
+</p>
+
 ### 4. Review Subject ID Exclusions
 
 Run **3. Review subject ID exclusions**.
 
 The notebook shows subject identifiers that do not cleanly map to the expected subject ID format. These rows are excluded unless you manually include specific raw IDs in the optional correction step.
 
+<p align="center">
+  <img src="tutorial/005.png" alt="Review subject ID rows that will be excluded" width="100%">
+</p>
+
 ### 5. Review Visit and Timepoint Mapping
 
 Run **4a. Review visit/timepoint mapping**.
 
 The notebook finds unique values in the selected visit/timepoint column, proposes canonical names, and lets you edit the cleaned value before running the final cleaning step.
+
+<p align="center">
+  <img src="tutorial/006.png" alt="Review and edit visit or timepoint mappings" width="100%">
+</p>
 
 Examples:
 
@@ -118,11 +142,19 @@ This applies the subject ID rules, column keep/rename rules, optional outlier in
 - column variable mapping;
 - excluded rows.
 
+<p align="center">
+  <img src="tutorial/007.png" alt="Preview cleaned data and generated dictionaries" width="100%">
+</p>
+
 ### 7. Download the Workbook
 
 Run **6. Download cleaned files**.
 
 You can accept the default filename or type a custom filename. If you do not include `.xlsx`, the notebook appends it.
+
+<p align="center">
+  <img src="tutorial/008.png" alt="Download the cleaned multi-sheet Excel workbook" width="100%">
+</p>
 
 ## Notes
 
