@@ -8,17 +8,17 @@ Step-by-step Google Colab notebook for turning REDCap exports into cleaner, anal
 
 <p align="center">
   <a href="https://colab.research.google.com/drive/1zZG9gbXq1o3bruxNNkm54csMEjJiuBsc?usp=sharing">
-    <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab">
+    <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab" width="15%">
   </a>
 </p>
 
-<p align="center">
+<p align="center" style="font-size: 1.25rem;">
   <strong>Clean REDCap exports without hand-editing spreadsheets.</strong><br>
   Upload an export, review IDs, rename columns, normalize visits, and download one traceable workbook.
 </p>
 
-<p align="center">
-  <code>_raw</code> + <code>_cleaned</code> + <code>timepoint_dictionary</code> + <code>column_variable_dictionary</code> + <code>excluded_rows</code>
+<p align="center" style="font-size: 1.25rem;">
+  <code>_raw</code> <code>➜</code> <code>_raw</code> + <code>_cleaned</code> + <code>timepoint_dictionary</code> + <code>column_variable_dictionary</code> + <code>excluded_rows</code>
 </p>
 
 > [!TIP]
