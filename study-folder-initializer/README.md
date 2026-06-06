@@ -7,7 +7,7 @@ Google Colab notebook for creating a new study Google Drive folder from a reusab
 </p>
 
 <p align="center">
-  <a href="https://colab.research.google.com/drive/1jkLfctMj5L7nNZMs4Mus-XCJdsBDViYD?usp=sharing">
+  <a href="https://colab.research.google.com/drive/1lE8EGSUYJWOwqIbz-ZFuBQtAcwjZWR56?usp=sharing">
     <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab" width="15%">
   </a>
 </p>
