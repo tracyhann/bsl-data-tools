@@ -2,6 +2,8 @@
 
 Google Colab notebook for publishing a cleaned local study folder into the Google Drive study-folder template.
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DSLWxheAKikej-9QDa1p_WOOGpl1jtXA?usp=sharing)
+
 <p align="center" style="font-size: 1.55rem;">
   <strong>Move from local cleaned workbooks to a Drive-ready study folder without hand-copying every sheet.</strong><br>
   Upload a zipped study folder, choose the template and destination, then initialize Drive, fill overview/data-map sheets, and upload cleaned data.
