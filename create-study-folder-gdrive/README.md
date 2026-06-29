@@ -3,12 +3,12 @@
 Google Colab notebook for publishing a cleaned local study folder into the Google Drive study-folder template.
 
 <p align="center">
-  <img src="assets/create-study-folder-gdrive-teaser.png" alt="Create Study Folder in Google Drive teaser showing local study exports organized into a Drive-ready folder structure" width="900">
+  <img src="assets/create-study-folder-gdrive-teaser.png" alt="Create Study Folder in Google Drive teaser showing local study exports organized into a Drive-ready folder structure" width="100%">
 </p>
 
 <p align="center">
   <a href="https://colab.research.google.com/drive/1DSLWxheAKikej-9QDa1p_WOOGpl1jtXA?usp=sharing">
-    <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab">
+    <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" width="15%">
   </a>
 </p>
 
