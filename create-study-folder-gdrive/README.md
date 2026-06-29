@@ -2,7 +2,15 @@
 
 Google Colab notebook for publishing a cleaned local study folder into the Google Drive study-folder template.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1DSLWxheAKikej-9QDa1p_WOOGpl1jtXA?usp=sharing)
+<p align="center">
+  <img src="assets/create-study-folder-gdrive-teaser.png" alt="Create Study Folder in Google Drive teaser showing local study exports organized into a Drive-ready folder structure" width="900">
+</p>
+
+<p align="center">
+  <a href="https://colab.research.google.com/drive/1DSLWxheAKikej-9QDa1p_WOOGpl1jtXA?usp=sharing">
+    <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab">
+  </a>
+</p>
 
 <p align="center" style="font-size: 1.55rem;">
   <strong>Move from local cleaned workbooks to a Drive-ready study folder without hand-copying every sheet.</strong><br>
