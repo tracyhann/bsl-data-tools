@@ -923,13 +923,13 @@
       `;
     }
 
-    function addRow(loggedAt, elapsedSeconds, autoPopulateMso = true) {
+    function addRow(loggedAt, elapsedSeconds, initialMsoOverride = null) {
       const protocol = getSelectedProtocol();
       const cycleSeconds = getCycleSeconds(protocol);
       const trainIndex = Math.floor(elapsedSeconds / cycleSeconds);
-      const initialMso = autoPopulateMso
+      const initialMso = initialMsoOverride === null
         ? String(getPreviousMsoValue() + getMsoStepSize())
-        : "";
+        : initialMsoOverride;
 
       const rowData = {
         currentTime: formatClockTime(loggedAt),
@@ -994,7 +994,8 @@
       startTime = new Date();
       startTimeDisplay.textContent = formatFullDateTime(startTime);
 
-      addRow(startTime, 0, false);
+      const initialMso = calculateInitialMso(getTreatmentTargetMso());
+      addRow(startTime, 0, initialMso);
       updateControls();
     }
 

@@ -168,3 +168,56 @@ test("normalizes calculator inputs to whole numbers on change", () => {
   assert.equal(elements.motorThresholdInput.value, "43");
   assert.equal(elements.treatmentTargetDisplay.textContent, "52");
 });
+
+test("starts with treatment target minus 30 in the first MSO field", () => {
+  const { context, createdElements, elements } = loadApp();
+  elements.motorThresholdInput.value = "43";
+  elements.motorThresholdInput.dispatch("input");
+
+  run(context, "startSession()");
+
+  assert.equal(run(context, "rows[0].mso"), "22");
+  const msoInput = createdElements.find(element => element.className === "mso-input");
+  assert.equal(msoInput.value, "22");
+});
+
+test("allows a blank target and starts with a blank first MSO field", () => {
+  const { context, createdElements } = loadApp();
+
+  run(context, "startSession()");
+
+  assert.equal(run(context, "rows[0].mso"), "");
+  const msoInput = createdElements.find(element => element.className === "mso-input");
+  assert.equal(msoInput.value, "");
+});
+
+test("does not overwrite a manually edited first MSO when target inputs change", () => {
+  const { context, createdElements, elements } = loadApp();
+  elements.motorThresholdInput.value = "43";
+  elements.motorThresholdInput.dispatch("input");
+  run(context, "startSession()");
+
+  const msoInput = createdElements.find(element => element.className === "mso-input");
+  msoInput.value = "35";
+  msoInput.dispatch("input");
+  elements.motorThresholdInput.value = "50";
+  elements.motorThresholdInput.dispatch("input");
+
+  assert.equal(run(context, "rows[0].mso"), "35");
+  assert.equal(msoInput.value, "35");
+});
+
+test("continues to add the configured step size after the first row", () => {
+  const { context, createdElements, elements } = loadApp();
+  elements.motorThresholdInput.value = "43";
+  elements.motorThresholdInput.dispatch("input");
+  run(context, "startSession()");
+
+  run(context, "addRow(new Date(startTime.getTime() + 9800), 9.8)");
+
+  const msoInputs = createdElements.filter(
+    element => element.className === "mso-input"
+  );
+  assert.equal(msoInputs[0].value, "22");
+  assert.equal(msoInputs[1].value, "24");
+});
