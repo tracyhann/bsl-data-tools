@@ -140,3 +140,31 @@ test("calculates the first-row MSO as target minus 30", () => {
   assert.equal(run(context, "calculateInitialMso(20)"), "-10");
   assert.equal(run(context, `calculateInitialMso("")`), "");
 });
+
+test("renders the treatment-target controls with a 120 percent default", () => {
+  assert.match(html, /id="motorThresholdInput"/);
+  assert.match(
+    html,
+    /id="treatmentTargetPercentageInput"[\s\S]*?value="120"/
+  );
+  assert.match(html, /id="treatmentTargetDisplay"/);
+});
+
+test("updates the displayed treatment target as inputs change", () => {
+  const { elements } = loadApp();
+  elements.motorThresholdInput.value = "43";
+  elements.motorThresholdInput.dispatch("input");
+  assert.equal(elements.treatmentTargetDisplay.textContent, "52");
+
+  elements.motorThresholdInput.value = "";
+  elements.motorThresholdInput.dispatch("input");
+  assert.equal(elements.treatmentTargetDisplay.textContent, "—");
+});
+
+test("normalizes calculator inputs to whole numbers on change", () => {
+  const { elements } = loadApp();
+  elements.motorThresholdInput.value = "42.6";
+  elements.motorThresholdInput.dispatch("change");
+  assert.equal(elements.motorThresholdInput.value, "43");
+  assert.equal(elements.treatmentTargetDisplay.textContent, "52");
+});
