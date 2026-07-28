@@ -697,6 +697,24 @@
       return input.value;
     }
 
+    function calculateTreatmentTarget(motorThresholdRaw, percentageRaw) {
+      const motorThresholdText = String(motorThresholdRaw ?? "").trim();
+      const percentageText = String(percentageRaw ?? "").trim();
+
+      if (motorThresholdText === "" || percentageText === "") return "";
+
+      const motorThreshold = Number(motorThresholdText);
+      const percentage = Number(percentageText);
+      if (!Number.isFinite(motorThreshold) || !Number.isFinite(percentage)) return "";
+
+      return Math.round(motorThreshold * percentage / 100);
+    }
+
+    function calculateInitialMso(treatmentTarget) {
+      if (treatmentTarget === "") return "";
+      return String(treatmentTarget - 30);
+    }
+
     function getMsoStepSize() {
       const rawValue = msoStepSizeInput.value.trim();
       if (rawValue === "") return 0;
