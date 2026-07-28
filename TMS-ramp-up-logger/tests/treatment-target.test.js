@@ -134,6 +134,14 @@ test("returns blank target when either calculator input is blank", () => {
   assert.equal(run(context, `calculateTreatmentTarget("43", "")`), "");
 });
 
+test("returns blank target when finite inputs overflow during multiplication", () => {
+  const { context } = loadApp();
+  assert.equal(
+    run(context, `calculateTreatmentTarget("1e308", "1e308")`),
+    ""
+  );
+});
+
 test("calculates the first-row MSO as target minus 30", () => {
   const { context } = loadApp();
   assert.equal(run(context, "calculateInitialMso(52)"), "22");
@@ -148,6 +156,21 @@ test("renders the treatment-target controls with a 120 percent default", () => {
     /id="treatmentTargetPercentageInput"[\s\S]*?value="120"/
   );
   assert.match(html, /id="treatmentTargetDisplay"/);
+});
+
+test("allows the treatment-target row to wrap at mid-width viewports", () => {
+  const mediaRule = html.match(
+    /@media \(max-width: 720px\) \{([\s\S]*?)@media \(max-width: 430px\)/
+  );
+  assert.ok(mediaRule, "Expected the 720px responsive rule");
+  assert.match(
+    mediaRule[1],
+    /\.treatment-target-row\s*\{[^}]*flex-wrap:\s*wrap;/
+  );
+  assert.match(
+    mediaRule[1],
+    /\.treatment-target-title\s*\{[^}]*flex:\s*0 0 100%;/
+  );
 });
 
 test("updates the displayed treatment target as inputs change", () => {
@@ -191,6 +214,18 @@ test("allows a blank target and starts with a blank first MSO field", () => {
   assert.equal(msoInput.value, "");
 });
 
+test("allows an unclamped negative first-row MSO without a conflicting minimum", () => {
+  const { context, createdElements, elements } = loadApp();
+  elements.motorThresholdInput.value = "20";
+  elements.treatmentTargetPercentageInput.value = "100";
+
+  run(context, "startSession()");
+
+  const msoInput = createdElements.find(element => element.className === "mso-input");
+  assert.equal(msoInput.value, "-10");
+  assert.equal(msoInput.min || "", "");
+});
+
 test("does not overwrite a manually edited first MSO when target inputs change", () => {
   const { context, createdElements, elements } = loadApp();
   elements.motorThresholdInput.value = "43";
@@ -220,4 +255,22 @@ test("continues to add the configured step size after the first row", () => {
   );
   assert.equal(msoInputs[0].value, "22");
   assert.equal(msoInputs[1].value, "24");
+});
+
+test("restarts with a new first-row MSO from the current treatment target", () => {
+  const { context, createdElements, elements } = loadApp();
+  elements.motorThresholdInput.value = "43";
+  run(context, "startSession()");
+  assert.equal(run(context, "rows[0].mso"), "22");
+
+  elements.motorThresholdInput.value = "50";
+  elements.motorThresholdInput.dispatch("input");
+  run(context, "startSession()");
+
+  assert.equal(run(context, "rows.length"), 1);
+  assert.equal(run(context, "rows[0].mso"), "30");
+  const msoInputs = createdElements.filter(
+    element => element.className === "mso-input"
+  );
+  assert.equal(msoInputs.at(-1).value, "30");
 });

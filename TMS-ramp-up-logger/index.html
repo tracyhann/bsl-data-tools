@@ -560,9 +560,11 @@
 
       .treatment-target-row {
         align-items: stretch;
+        flex-wrap: wrap;
       }
 
       .treatment-target-title {
+        flex: 0 0 100%;
         width: 100%;
       }
 
@@ -852,7 +854,8 @@
       const percentage = Number(percentageText);
       if (!Number.isFinite(motorThreshold) || !Number.isFinite(percentage)) return "";
 
-      return Math.round(motorThreshold * percentage / 100);
+      const treatmentTarget = motorThreshold * percentage / 100;
+      return Number.isFinite(treatmentTarget) ? Math.round(treatmentTarget) : "";
     }
 
     function calculateInitialMso(treatmentTarget) {
@@ -957,7 +960,6 @@
       msoInput.className = "mso-input";
       msoInput.type = "number";
       msoInput.inputMode = "numeric";
-      msoInput.min = "0";
       msoInput.step = "1";
       msoInput.value = rowData.mso;
       msoInput.placeholder = "Enter MSO";
