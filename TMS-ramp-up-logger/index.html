@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#07101f" />
+  <title>TMS Train Logger</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050914;
+      --bg-deep: #030610;
+      --panel: rgba(11, 20, 37, 0.88);
+      --panel-strong: #0c172a;
+      --panel-soft: rgba(17, 31, 54, 0.72);
+      --text: #eef7ff;
+      --muted: #8fa4bc;
+      --subtle: #5d7188;
+      --line: rgba(137, 181, 226, 0.16);
+      --line-strong: rgba(91, 225, 255, 0.34);
+      --cyan: #58e1ff;
+      --cyan-strong: #18c8ef;
+      --violet: #9d7cff;
+      --violet-strong: #7d5cff;
+      --green: #4ce5a7;
+      --danger: #ff6f91;
+      --danger-soft: rgba(255, 91, 129, 0.12);
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+      --glow: 0 0 30px rgba(88, 225, 255, 0.13);
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg-deep);
+      font-size: 18px;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(88, 225, 255, 0.13), transparent 30%),
+        radial-gradient(circle at 88% 3%, rgba(157, 124, 255, 0.16), transparent 34%),
+        linear-gradient(160deg, #07101f 0%, #050914 48%, #030610 100%);
+      background-attachment: fixed;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.17;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: linear-gradient(to bottom, black, transparent 86%);
+    }
+
+    .app {
+      position: relative;
+      width: min(1220px, calc(100% - 30px));
+      margin: 38px auto 52px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      margin-bottom: 9px;
+      color: var(--cyan);
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 3.15rem);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+      background: linear-gradient(110deg, #ffffff 0%, #c9f8ff 48%, #c8baff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .session-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      flex: 0 0 auto;
+      min-height: 38px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(7, 15, 28, 0.72);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      backdrop-filter: blur(12px);
+    }
+
+    .session-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--subtle);
+      box-shadow: 0 0 0 4px rgba(93, 113, 136, 0.12);
+    }
+
+    .session-indicator.active {
+      border-color: rgba(76, 229, 167, 0.32);
+      color: #b7f8dc;
+      background: rgba(19, 62, 50, 0.32);
+    }
+
+    .session-indicator.active .session-dot {
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(76, 229, 167, 0.13), 0 0 18px rgba(76, 229, 167, 0.7);
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 18px;
+      padding: 21px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: linear-gradient(145deg, rgba(14, 26, 47, 0.92), rgba(7, 15, 28, 0.92));
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+      backdrop-filter: blur(18px);
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 26px;
+      right: 26px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(88, 225, 255, 0.45), rgba(157, 124, 255, 0.32), transparent);
+      opacity: 0.85;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: minmax(210px, 1fr) minmax(190px, 0.78fr) minmax(420px, 1.6fr);
+      gap: 18px;
+      align-items: end;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 9px;
+      color: #d9e8f7;
+      font-size: 0.84rem;
+      font-weight: 720;
+      letter-spacing: 0.01em;
+    }
+
+    select,
+    button,
+    input {
+      font: inherit;
+    }
+
+    select,
+    .control-input,
+    .mso-input {
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: rgba(4, 11, 22, 0.78);
+      outline: none;
+      transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+    }
+
+    select,
+    .control-input {
+      width: 100%;
+      min-height: 48px;
+      border-radius: var(--radius-md);
+      padding: 0 13px;
+    }
+
+    select:hover,
+    .control-input:hover,
+    .mso-input:hover {
+      border-color: rgba(143, 185, 226, 0.32);
+    }
+
+    select:focus,
+    .control-input:focus,
+    .mso-input:focus {
+      border-color: var(--cyan);
+      background: rgba(5, 16, 30, 0.95);
+      box-shadow: 0 0 0 3px rgba(88, 225, 255, 0.12), var(--glow);
+    }
+
+    select:disabled {
+      opacity: 0.58;
+    }
+
+    .protocol-details {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    button {
+      position: relative;
+      min-height: 48px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      padding: 0 14px;
+      color: var(--text);
+      font-size: 0.84rem;
+      font-weight: 760;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 120ms ease, filter 120ms ease, border-color 120ms ease, background 120ms ease, opacity 120ms ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(88, 225, 255, 0.17);
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      filter: saturate(0.45);
+    }
+
+    .primary {
+      color: #03131a;
+      background: linear-gradient(135deg, #70ecff, #27c9ee);
+      box-shadow: 0 9px 24px rgba(24, 200, 239, 0.18);
+    }
+
+    .log-action {
+      color: #f8f7ff;
+      background: linear-gradient(135deg, var(--violet), var(--violet-strong));
+      box-shadow: 0 9px 24px rgba(125, 92, 255, 0.18);
+    }
+
+    .secondary {
+      border-color: var(--line);
+      background: rgba(22, 39, 65, 0.72);
+    }
+
+    .delete-action {
+      border-color: rgba(255, 111, 145, 0.22);
+      color: #ffc1d0;
+      background: var(--danger-soft);
+    }
+
+    .danger {
+      border-color: rgba(255, 111, 145, 0.38);
+      color: #ffd1dc;
+      background: linear-gradient(135deg, rgba(157, 38, 76, 0.72), rgba(107, 25, 54, 0.78));
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: 0.72fr 1.7fr 0.72fr;
+      gap: 12px;
+    }
+
+    .status-box {
+      min-height: 96px;
+      padding: 15px 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(145deg, rgba(18, 34, 57, 0.68), rgba(7, 16, 30, 0.66));
+    }
+
+    .status-label {
+      margin-bottom: 11px;
+      color: var(--subtle);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .status-value {
+      color: #ecf8ff;
+      font-family: var(--mono);
+      font-size: clamp(0.92rem, 2vw, 1.08rem);
+      font-weight: 760;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .table-card {
+      padding: 0;
+    }
+
+    .table-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 21px 14px;
+    }
+
+    .table-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 760;
+      letter-spacing: -0.02em;
+    }
+
+    .formula-chip {
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(3, 9, 18, 0.5);
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      white-space: nowrap;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: rgba(3, 9, 18, 0.28);
+    }
+
+    table {
+      width: 100%;
+      min-width: 740px;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums;
+    }
+
+    th,
+    td {
+      padding: 13px 17px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      color: #a8bfd6;
+      background: #0b1728;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    td {
+      color: #dcebf7;
+      font-family: var(--mono);
+      font-size: 0.91rem;
+    }
+
+    tbody tr {
+      transition: background 110ms ease;
+    }
+
+    tbody tr:hover {
+      background: rgba(88, 225, 255, 0.045);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .mso-input {
+      width: 120px;
+      min-height: 40px;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-family: var(--mono);
+      font-weight: 700;
+    }
+
+    .empty-state {
+      height: 152px;
+      color: var(--subtle);
+      text-align: center;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
+    .footer-note {
+      margin: 0;
+      padding: 14px 21px 18px;
+      color: var(--subtle);
+      font-size: 0.8rem;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 980px) {
+      .controls-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .button-row {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        width: min(100% - 20px, 1220px);
+        margin: 22px auto 34px;
+      }
+
+      .header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .controls-grid,
+      .status-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .button-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .button-row button:last-child {
+        grid-column: 1 / -1;
+      }
+
+      .table-heading {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .formula-chip {
+        white-space: normal;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .card {
+        padding: 17px;
+        border-radius: 19px;
+      }
+
+      .table-card {
+        padding: 0;
+      }
+
+      .button-row {
+        grid-template-columns: 1fr;
+      }
+
+      .button-row button:last-child {
+        grid-column: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div>
+        <div class="eyebrow">Neuromodulation Session Console</div>
+        <h1>TMS Train Logger</h1>
+      </div>
+      <div class="session-indicator" id="sessionIndicator" aria-live="polite">
+        <span class="session-dot" aria-hidden="true"></span>
+        <span id="sessionIndicatorText">Ready</span>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="controls-grid">
+        <div>
+          <label for="protocolSelect">Protocol</label>
+          <select id="protocolSelect">
+            <option value="SNT" selected>SNT</option>
+          </select>
+          <div class="protocol-details" id="protocolDetails">
+            Train Duration: 1.8 s · ITI: 8 s · Cycle: 9.8 s
+          </div>
+        </div>
+
+        <div>
+          <label for="msoStepSizeInput">MSO step size (%)</label>
+          <input
+            class="control-input"
+            id="msoStepSizeInput"
+            type="number"
+            inputmode="numeric"
+            step="1"
+            value="2"
+            placeholder="0"
+          />
+          <div class="protocol-details">Optional. Blank is treated as 0.</div>
+        </div>
+
+        <div class="button-row">
+          <button class="primary" id="startButton" type="button">TMS Start</button>
+          <button class="log-action" id="logButton" type="button" disabled>Log</button>
+          <button class="delete-action" id="deleteLastButton" type="button" disabled>Delete last entry</button>
+          <button class="secondary" id="exportButton" type="button" disabled>Export CSV</button>
+          <button class="danger" id="resetButton" type="button" disabled>Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="status-grid">
+        <div class="status-box">
+          <div class="status-label">Protocol</div>
+          <div class="status-value" id="protocolStatus">SNT</div>
+        </div>
+        <div class="status-box">
+          <div class="status-label">Start Time</div>
+          <div class="status-value" id="startTimeDisplay">Not started</div>
+        </div>
+        <div class="status-box">
+          <div class="status-label">Rows Logged</div>
+          <div class="status-value" id="rowCountDisplay">0</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card table-card">
+      <div class="table-heading">
+        <h2 class="table-title">Session log</h2>
+        <div class="formula-chip">index = floor(elapsed ÷ 9.8 s)</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Current Time</th>
+              <th>Time Since Start (+ s)</th>
+              <th>Train Index</th>
+              <th>MSO (%)</th>
+            </tr>
+          </thead>
+          <tbody id="logTableBody">
+            <tr id="emptyRow">
+              <td colspan="4" class="empty-state">Press “TMS Start” to begin.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="footer-note">
+        Each new row uses the previous MSO plus the configured step size. All MSO fields remain editable, and all numeric controls use whole-number increments.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    const protocols = {
+      SNT: {
+        name: "SNT",
+        trainDurationSeconds: 1.8,
+        itiSeconds: 8
+      }
+    };
+
+    const protocolSelect = document.getElementById("protocolSelect");
+    const protocolDetails = document.getElementById("protocolDetails");
+    const protocolStatus = document.getElementById("protocolStatus");
+    const msoStepSizeInput = document.getElementById("msoStepSizeInput");
+    const startButton = document.getElementById("startButton");
+    const logButton = document.getElementById("logButton");
+    const deleteLastButton = document.getElementById("deleteLastButton");
+    const exportButton = document.getElementById("exportButton");
+    const resetButton = document.getElementById("resetButton");
+    const startTimeDisplay = document.getElementById("startTimeDisplay");
+    const rowCountDisplay = document.getElementById("rowCountDisplay");
+    const logTableBody = document.getElementById("logTableBody");
+    const sessionIndicator = document.getElementById("sessionIndicator");
+    const sessionIndicatorText = document.getElementById("sessionIndicatorText");
+
+    let startTime = null;
+    let rows = [];
+
+    function getSelectedProtocol() {
+      return protocols[protocolSelect.value];
+    }
+
+    function getCycleSeconds(protocol) {
+      return protocol.trainDurationSeconds + protocol.itiSeconds;
+    }
+
+    function pad(number, width = 2) {
+      return String(number).padStart(width, "0");
+    }
+
+    function formatTimeZone(date) {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZoneName: "short"
+      }).formatToParts(date);
+
+      return parts.find(part => part.type === "timeZoneName")?.value || "";
+    }
+
+    function formatFullDateTime(date) {
+      const month = pad(date.getMonth() + 1);
+      const day = pad(date.getDate());
+      const year = date.getFullYear();
+      const hours = pad(date.getHours());
+      const minutes = pad(date.getMinutes());
+      const seconds = pad(date.getSeconds());
+      const timezone = formatTimeZone(date);
+
+      return `${month}-${day}-${year} ${hours}:${minutes}:${seconds} ${timezone}`;
+    }
+
+    function formatClockTime(date) {
+      return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+    }
+
+    function updateProtocolDisplay() {
+      const protocol = getSelectedProtocol();
+      const cycleSeconds = getCycleSeconds(protocol);
+
+      protocolDetails.textContent =
+        `Train Duration: ${protocol.trainDurationSeconds} s · ` +
+        `ITI: ${protocol.itiSeconds} s · ` +
+        `Cycle: ${cycleSeconds.toFixed(1)} s`;
+
+      protocolStatus.textContent = protocol.name;
+    }
+
+    function normalizeIntegerInput(input) {
+      const rawValue = input.value.trim();
+      if (rawValue === "") return "";
+
+      const numericValue = Number(rawValue);
+      if (!Number.isFinite(numericValue)) {
+        input.value = "";
+        return "";
+      }
+
+      const integerValue = Math.round(numericValue);
+      input.value = String(integerValue);
+      return input.value;
+    }
+
+    function getMsoStepSize() {
+      const rawValue = msoStepSizeInput.value.trim();
+      if (rawValue === "") return 0;
+
+      const numericValue = Number(rawValue);
+      return Number.isFinite(numericValue) ? Math.round(numericValue) : 0;
+    }
+
+    function getPreviousMsoValue() {
+      if (rows.length === 0) return 0;
+
+      const rawValue = String(rows[rows.length - 1].mso ?? "").trim();
+      if (rawValue === "") return 0;
+
+      const numericValue = Number(rawValue);
+      return Number.isFinite(numericValue) ? Math.round(numericValue) : 0;
+    }
+
+    function updateControls() {
+      const sessionActive = startTime !== null;
+
+      logButton.disabled = !sessionActive;
+      deleteLastButton.disabled = rows.length === 0;
+      exportButton.disabled = rows.length === 0;
+      resetButton.disabled = !sessionActive && rows.length === 0;
+      protocolSelect.disabled = sessionActive;
+      rowCountDisplay.textContent = String(rows.length);
+
+      sessionIndicator.classList.toggle("active", sessionActive);
+      sessionIndicatorText.textContent = sessionActive ? "Session active" : "Ready";
+    }
+
+    function clearEmptyState() {
+      const emptyRow = document.getElementById("emptyRow");
+      if (emptyRow) emptyRow.remove();
+    }
+
+    function showEmptyState(message) {
+      logTableBody.innerHTML = `
+        <tr id="emptyRow">
+          <td colspan="4" class="empty-state">${message}</td>
+        </tr>
+      `;
+    }
+
+    function addRow(loggedAt, elapsedSeconds, autoPopulateMso = true) {
+      const protocol = getSelectedProtocol();
+      const cycleSeconds = getCycleSeconds(protocol);
+      const trainIndex = Math.floor(elapsedSeconds / cycleSeconds);
+      const initialMso = autoPopulateMso
+        ? String(getPreviousMsoValue() + getMsoStepSize())
+        : "";
+
+      const rowData = {
+        currentTime: formatClockTime(loggedAt),
+        elapsedSeconds,
+        trainIndex,
+        mso: initialMso
+      };
+
+      rows.push(rowData);
+      clearEmptyState();
+
+      const row = document.createElement("tr");
+
+      const timeCell = document.createElement("td");
+      timeCell.textContent = rowData.currentTime;
+
+      const elapsedCell = document.createElement("td");
+      elapsedCell.textContent = rowData.elapsedSeconds.toFixed(1);
+
+      const indexCell = document.createElement("td");
+      indexCell.textContent = String(rowData.trainIndex);
+
+      const msoCell = document.createElement("td");
+      const msoInput = document.createElement("input");
+      msoInput.className = "mso-input";
+      msoInput.type = "number";
+      msoInput.inputMode = "numeric";
+      msoInput.min = "0";
+      msoInput.step = "1";
+      msoInput.value = rowData.mso;
+      msoInput.placeholder = "Enter MSO";
+      msoInput.setAttribute("aria-label", `MSO for train index ${rowData.trainIndex}`);
+
+      const rowIndex = rows.length - 1;
+      msoInput.addEventListener("input", event => {
+        rows[rowIndex].mso = event.target.value;
+      });
+
+      msoInput.addEventListener("change", event => {
+        rows[rowIndex].mso = normalizeIntegerInput(event.target);
+      });
+
+      msoCell.appendChild(msoInput);
+      row.append(timeCell, elapsedCell, indexCell, msoCell);
+      logTableBody.appendChild(row);
+
+      updateControls();
+      msoInput.focus();
+    }
+
+    function startSession() {
+      if (startTime !== null || rows.length > 0) {
+        const shouldRestart = window.confirm(
+          "Starting a new session will clear the current table. Continue?"
+        );
+        if (!shouldRestart) return;
+      }
+
+      rows = [];
+      logTableBody.innerHTML = "";
+
+      startTime = new Date();
+      startTimeDisplay.textContent = formatFullDateTime(startTime);
+
+      addRow(startTime, 0, false);
+      updateControls();
+    }
+
+    function logTrain() {
+      if (!startTime) return;
+
+      const loggedAt = new Date();
+      const elapsedSeconds = Math.max(0, (loggedAt.getTime() - startTime.getTime()) / 1000);
+      addRow(loggedAt, elapsedSeconds);
+    }
+
+    function deleteLastEntry() {
+      if (rows.length === 0) return;
+
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+
+      rows.pop();
+
+      const tableRows = logTableBody.querySelectorAll("tr:not(#emptyRow)");
+      const lastTableRow = tableRows[tableRows.length - 1];
+      if (lastTableRow) lastTableRow.remove();
+
+      if (rows.length === 0) {
+        showEmptyState(startTime ? "No entries remain. Press “Log” to add one." : "Press “TMS Start” to begin.");
+      }
+
+      updateControls();
+    }
+
+    function resetSession() {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+
+      startTime = null;
+      rows = [];
+      startTimeDisplay.textContent = "Not started";
+      showEmptyState("Press “TMS Start” to begin.");
+      updateControls();
+    }
+
+    function escapeCsv(value) {
+      const text = String(value ?? "");
+      if (/[",\n]/.test(text)) {
+        return `"${text.replace(/"/g, '""')}"`;
+      }
+      return text;
+    }
+
+    function exportCsv() {
+      if (rows.length === 0) return;
+
+      const header = [
+        "Current Time",
+        "Time Since Start (+ s)",
+        "Train Index",
+        "MSO (%)"
+      ];
+
+      const csvRows = rows.map(row => [
+        row.currentTime,
+        row.elapsedSeconds.toFixed(1),
+        row.trainIndex,
+        row.mso
+      ]);
+
+      const csv = [header, ...csvRows]
+        .map(row => row.map(escapeCsv).join(","))
+        .join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const fileTimestamp = startTime
+        ? `${startTime.getFullYear()}${pad(startTime.getMonth() + 1)}${pad(startTime.getDate())}_${pad(startTime.getHours())}${pad(startTime.getMinutes())}${pad(startTime.getSeconds())}`
+        : "session";
+
+      link.href = url;
+      link.download = `TMS_Log_${fileTimestamp}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    protocolSelect.addEventListener("change", updateProtocolDisplay);
+    msoStepSizeInput.addEventListener("change", () => {
+      normalizeIntegerInput(msoStepSizeInput);
+    });
+    startButton.addEventListener("click", startSession);
+    logButton.addEventListener("click", logTrain);
+    deleteLastButton.addEventListener("click", deleteLastEntry);
+    exportButton.addEventListener("click", exportCsv);
+    resetButton.addEventListener("click", resetSession);
+
+    updateProtocolDisplay();
+    updateControls();
+  </script>
+</body>
+</html>
