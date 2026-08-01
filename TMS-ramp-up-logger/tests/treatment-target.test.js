@@ -274,3 +274,16 @@ test("restarts with a new first-row MSO from the current treatment target", () =
   );
   assert.equal(msoInputs.at(-1).value, "30");
 });
+
+test("uses one-based train indices at cycle boundaries", () => {
+  const { context } = loadApp();
+
+  run(context, `addRow(new Date(0), 0, "")`);
+  run(context, `addRow(new Date(9800), 9.8, "")`);
+
+  assert.equal(
+    run(context, "JSON.stringify(rows.map(row => row.trainIndex))"),
+    "[1,2]"
+  );
+  assert.match(html, /index = floor\(elapsed ÷ 9\.8 s\) \+ 1/);
+});

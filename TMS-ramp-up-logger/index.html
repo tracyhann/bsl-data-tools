@@ -722,7 +722,7 @@
     <section class="card table-card">
       <div class="table-heading">
         <h2 class="table-title">Session log</h2>
-        <div class="formula-chip">index = floor(elapsed ÷ 9.8 s)</div>
+        <div class="formula-chip">index = floor(elapsed ÷ 9.8 s) + 1</div>
       </div>
       <div class="table-wrap">
         <table>
@@ -929,7 +929,7 @@
     function addRow(loggedAt, elapsedSeconds, initialMsoOverride = null) {
       const protocol = getSelectedProtocol();
       const cycleSeconds = getCycleSeconds(protocol);
-      const trainIndex = Math.floor(elapsedSeconds / cycleSeconds);
+      const trainIndex = Math.floor(elapsedSeconds / cycleSeconds) + 1;
       const initialMso = initialMsoOverride === null
         ? String(getPreviousMsoValue() + getMsoStepSize())
         : initialMsoOverride;
