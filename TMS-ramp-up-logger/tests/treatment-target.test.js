@@ -344,3 +344,18 @@ test("exports Subject ID once as escaped CSV metadata", async () => {
   assert.equal(lines[2].split(",")[2], "1");
   assert.equal((csv.match(/Subject ID/g) || []).length, 1);
 });
+
+test("includes a sanitized Subject ID in the CSV filename", () => {
+  const { context, createdElements, elements } = loadApp();
+  elements.subjectIdInput.value = " ABC / 123 ";
+  run(context, "startSession()");
+
+  run(context, "exportCsv()");
+  const downloadLink = createdElements.find(element => element.download);
+
+  assert.ok(downloadLink, "Expected export to create a download link");
+  assert.match(
+    downloadLink.download,
+    /^TMS_Log_ABC_123_\d{8}_\d{6}\.csv$/
+  );
+});

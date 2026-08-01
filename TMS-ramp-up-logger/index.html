@@ -1080,6 +1080,10 @@
       return text;
     }
 
+    function sanitizeFilenamePart(value) {
+      return String(value ?? "").replace(/[^A-Za-z0-9._-]+/g, "_");
+    }
+
     function exportCsv() {
       if (rows.length === 0) return;
 
@@ -1111,9 +1115,10 @@
       const fileTimestamp = startTime
         ? `${startTime.getFullYear()}${pad(startTime.getMonth() + 1)}${pad(startTime.getDate())}_${pad(startTime.getHours())}${pad(startTime.getMinutes())}${pad(startTime.getSeconds())}`
         : "session";
+      const filenameSubjectId = sanitizeFilenamePart(subjectId);
 
       link.href = url;
-      link.download = `TMS_Log_${fileTimestamp}.csv`;
+      link.download = `TMS_Log_${filenameSubjectId}_${fileTimestamp}.csv`;
       document.body.appendChild(link);
       link.click();
       link.remove();
