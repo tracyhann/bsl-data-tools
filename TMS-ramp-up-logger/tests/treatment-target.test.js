@@ -22,6 +22,8 @@ class FakeHTMLElement {
     this.children = [];
     this.listeners = new Map();
     this.classList = { toggle() {} };
+    this.validationMessage = "";
+    this.reportValidityCalls = 0;
   }
 
   addEventListener(type, listener) {
@@ -50,6 +52,13 @@ class FakeHTMLElement {
   }
 
   setAttribute() {}
+  setCustomValidity(message) {
+    this.validationMessage = message;
+  }
+  reportValidity() {
+    this.reportValidityCalls += 1;
+    return this.value.trim() !== "" && this.validationMessage === "";
+  }
   remove() {}
   focus() {}
   blur() {}
@@ -61,6 +70,7 @@ function loadApp() {
     "protocolSelect",
     "protocolDetails",
     "protocolStatus",
+    "subjectIdInput",
     "msoStepSizeInput",
     "motorThresholdInput",
     "treatmentTargetPercentageInput",
@@ -81,6 +91,7 @@ function loadApp() {
   const createdElements = [];
 
   elements.protocolSelect.value = "SNT";
+  elements.subjectIdInput.value = "SUBJECT-001";
   elements.msoStepSizeInput.value = "2";
   elements.treatmentTargetPercentageInput.value = "120";
 
@@ -286,4 +297,23 @@ test("uses one-based train indices at cycle boundaries", () => {
     "[1,2]"
   );
   assert.match(html, /index = floor\(elapsed ÷ 9\.8 s\) \+ 1/);
+});
+
+test("renders Subject ID as a required field beside the treatment target", () => {
+  assert.match(
+    html,
+    /class="treatment-field subject-id-field"[\s\S]*?for="subjectIdInput">Subject ID<[\s\S]*?id="subjectIdInput"[\s\S]*?required/
+  );
+});
+
+test("blocks session start when Subject ID is blank or whitespace", () => {
+  const { context, elements } = loadApp();
+  elements.subjectIdInput.value = "   ";
+
+  run(context, "startSession()");
+
+  assert.equal(run(context, "startTime"), null);
+  assert.equal(run(context, "rows.length"), 0);
+  assert.equal(elements.subjectIdInput.reportValidityCalls, 1);
+  assert.equal(elements.subjectIdInput.validationMessage, "Subject ID is required.");
 });

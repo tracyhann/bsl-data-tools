@@ -609,6 +609,7 @@
         align-items: end;
       }
 
+      .subject-id-field,
       .treatment-target-title,
       .treatment-result {
         grid-column: 1 / -1;
@@ -665,7 +666,17 @@
         </div>
       </div>
 
-      <div class="treatment-target-row" aria-label="Treatment target calculator">
+      <div class="treatment-target-row" aria-label="Subject and treatment target">
+        <div class="treatment-field subject-id-field">
+          <label for="subjectIdInput">Subject ID</label>
+          <input
+            class="control-input"
+            id="subjectIdInput"
+            type="text"
+            autocomplete="off"
+            required
+          />
+        </div>
         <div class="treatment-target-title">Treatment target</div>
         <span class="formula-symbol" aria-hidden="true">=</span>
         <div class="treatment-field">
@@ -761,6 +772,7 @@
     const protocolSelect = document.getElementById("protocolSelect");
     const protocolDetails = document.getElementById("protocolDetails");
     const protocolStatus = document.getElementById("protocolStatus");
+    const subjectIdInput = document.getElementById("subjectIdInput");
     const msoStepSizeInput = document.getElementById("msoStepSizeInput");
     const motorThresholdInput = document.getElementById("motorThresholdInput");
     const treatmentTargetPercentageInput = document.getElementById(
@@ -899,6 +911,23 @@
       return Number.isFinite(numericValue) ? Math.round(numericValue) : 0;
     }
 
+    function getSubjectId() {
+      return subjectIdInput.value.trim();
+    }
+
+    function validateSubjectId() {
+      const subjectId = getSubjectId();
+      subjectIdInput.setCustomValidity(
+        subjectId === "" ? "Subject ID is required." : ""
+      );
+
+      if (subjectId === "") {
+        subjectIdInput.reportValidity();
+      }
+
+      return subjectId;
+    }
+
     function updateControls() {
       const sessionActive = startTime !== null;
 
@@ -983,6 +1012,8 @@
     }
 
     function startSession() {
+      if (validateSubjectId() === "") return;
+
       if (startTime !== null || rows.length > 0) {
         const shouldRestart = window.confirm(
           "Starting a new session will clear the current table. Continue?"
@@ -1086,6 +1117,11 @@
     }
 
     protocolSelect.addEventListener("change", updateProtocolDisplay);
+    subjectIdInput.addEventListener("input", () => {
+      if (getSubjectId() !== "") {
+        subjectIdInput.setCustomValidity("");
+      }
+    });
     msoStepSizeInput.addEventListener("change", () => {
       normalizeIntegerInput(msoStepSizeInput);
     });
