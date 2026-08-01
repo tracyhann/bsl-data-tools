@@ -1083,6 +1083,10 @@
     function exportCsv() {
       if (rows.length === 0) return;
 
+      const subjectId = validateSubjectId();
+      if (subjectId === "") return;
+
+      const metadata = ["Subject ID", subjectId];
       const header = [
         "Current Time",
         "Time Since Start (+ s)",
@@ -1097,7 +1101,7 @@
         row.mso
       ]);
 
-      const csv = [header, ...csvRows]
+      const csv = [metadata, header, ...csvRows]
         .map(row => row.map(escapeCsv).join(","))
         .join("\n");
 

@@ -89,6 +89,7 @@ function loadApp() {
   ];
   const elements = Object.fromEntries(ids.map(id => [id, new FakeHTMLElement(id)]));
   const createdElements = [];
+  let exportedBlob = null;
 
   elements.protocolSelect.value = "SNT";
   elements.subjectIdInput.value = "SUBJECT-001";
@@ -114,7 +115,8 @@ function loadApp() {
     document,
     HTMLElement: FakeHTMLElement,
     URL: {
-      createObjectURL() {
+      createObjectURL(blob) {
+        exportedBlob = blob;
         return "blob:test";
       },
       revokeObjectURL() {}
@@ -127,7 +129,14 @@ function loadApp() {
   });
 
   vm.runInContext(scriptMatch[1], context);
-  return { context, createdElements, elements };
+  return {
+    context,
+    createdElements,
+    elements,
+    getExportedBlob() {
+      return exportedBlob;
+    }
+  };
 }
 
 function run(context, source) {
@@ -316,4 +325,22 @@ test("blocks session start when Subject ID is blank or whitespace", () => {
   assert.equal(run(context, "rows.length"), 0);
   assert.equal(elements.subjectIdInput.reportValidityCalls, 1);
   assert.equal(elements.subjectIdInput.validationMessage, "Subject ID is required.");
+});
+
+test("exports Subject ID once as escaped CSV metadata", async () => {
+  const { context, elements, getExportedBlob } = loadApp();
+  elements.subjectIdInput.value = ` ABC, "123" `;
+  run(context, "startSession()");
+
+  run(context, "exportCsv()");
+  const csv = await getExportedBlob().text();
+  const lines = csv.split("\n");
+
+  assert.equal(lines[0], `Subject ID,"ABC, ""123"""`);
+  assert.equal(
+    lines[1],
+    "Current Time,Time Since Start (+ s),Train Index,MSO (%)"
+  );
+  assert.equal(lines[2].split(",")[2], "1");
+  assert.equal((csv.match(/Subject ID/g) || []).length, 1);
 });
